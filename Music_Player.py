@@ -1,130 +1,95 @@
-import tkinter as tk
-from tkinter import filedialog
-import os
+from tkinter import *
 import pygame
+from PIL import Image, ImageTk  # Import classes from Pillow to work with images
+from tkinter import filedialog
 
-# Initialize Pygame mixer
-pygame.mixer.init()
 
-# Global variables to store the song list and current index
-music_files = []
-current_song_index = 0
-is_playing = False
 
-# Function to load and play a song
-def load_music(song):
-    pygame.mixer.music.load(song)
-    pygame.mixer.music.play()
-    update_song_label(song)
-    global is_playing
-    is_playing = True
-    play_pause_button.config(text="Pause")
-
-# Function to select folder or music file and load music files
-def select_folder():
-    global music_files, current_song_index
-    folder_path = filedialog.askdirectory()
-    if folder_path:
-        all_files = os.listdir(folder_path)
-        music_files = [os.path.join(folder_path, file) for file in all_files if file.endswith(('.mp3', '.wav'))]
-        if music_files:
-            current_song_index = 0
-            load_music(music_files[current_song_index])
-        else:
-            result_label.config(text="No music files found in the selected folder.")
-    else:
-        file_path = filedialog.askopenfilename(filetypes=[("Music Files", "*.mp3 *.wav")])
-        if file_path:
-            music_files = [file_path]
-            current_song_index = 0
-            load_music(music_files[current_song_index])
-        else:
-            result_label.config(text="No music file selected.")
-
-# Function to play the next song when the current one ends
-def play_next_song():
-    global current_song_index
-    if music_files:
-        current_song_index += 1
-        if current_song_index < len(music_files):
-            load_music(music_files[current_song_index])
-        else:
-            result_label.config(text="End of playlist.")
-            stop_music()
-
-# Function to play the previous song
-def play_prev_song():
-    global current_song_index
-    if music_files:
-        current_song_index -= 1
-        if current_song_index >= 0:
-            load_music(music_files[current_song_index])
-        else:
-            result_label.config(text="You are at the beginning of the playlist.")
-
-# Function to update the label with the current song
-def update_song_label(song):
-    song_name = os.path.basename(song)
-    result_label.config(text=f"🎶 Now playing: {song_name} 🎶")
-
-# Function to toggle play/pause
-def toggle_play_pause():
-    global is_playing
-    if is_playing:
-        pygame.mixer.music.pause()
-        play_pause_button.config(text="Play")
-        is_playing = False
-    else:
-        pygame.mixer.music.unpause()
-        play_pause_button.config(text="Pause")
-        is_playing = True
-
-# Function to stop the current song
-def stop_music():
-    pygame.mixer.music.stop()
-    result_label.config(text="Music stopped.")
-    play_pause_button.config(text="Play")
-    global is_playing
-    is_playing = False
-
-# Create the main window
-music_p = tk.Tk()
+music_p = Tk()
 music_p.geometry("600x400")
 music_p.config(bg="#333333")
 music_p.title("A-Z Music Player")
 music_p.resizable(False, False)
 
-# Header label
-heading_label = tk.Label(music_p, text="A-Z Music Player", bg="#1c1c1c", fg="#FFD700", font=("Arial", 30, "bold"))
-heading_label.place(relx=0.0, rely=0.0, relwidth=1.0)
+#Initialize pygame mixter
+pygame.mixer.init()
 
-# Label to display current song
-result_label = tk.Label(music_p, text="", font=("Arial", 16), fg="#FFD700", bg="#333333")
-result_label.place(relx=0.0, rely=0.3, relwidth=1.0)
+#Add song function
+def add_song():
+    song = filedialog.askopenfilename(initialdir="C:/New folder Aamir/MCA", title="Choose A Song", filetypes=(("Mp3 Files", "*.mp3"), ))
+    
+    #Strip out the directory info and .mp3 
+    song = song.replace("C:/New folder Aamir/MCA/Music/", "")
+    song = song.replace(".mp3", "")
+   
 
-# Define a style for buttons
-button_style = {"bg": "#556B2F", "fg": "#ffffff", "font": ("Arial", 15, "bold"), "bd": 5, "relief": "raised"}
+    #Add song to listbox
+    list_box.insert(END, song)
 
-# Create buttons and position them in the center
-play_pause_button = tk.Button(music_p, text="Play", command=toggle_play_pause, **button_style)
-play_pause_button.place(relx=0.5, rely=0.6, anchor="center", width=100, height=50)
+def play():
+    song = list_box.get(ACTIVE)
+    song = f'C:/New folder Aamir/MCA/Music/{song}.mp3'
+    pygame.mixer.music.load(song)
+    pygame.mixer.music.play(loops=0)
 
-next_button = tk.Button(music_p, text="Next", command=play_next_song, **button_style)
-next_button.place(relx=0.65, rely=0.6, anchor="center", width=100, height=50)
+# Stop playing current song and clear selection   
+def stop():
+    pygame.mixer.music.stop()
+    list_box.select_clear(ACTIVE)
 
-prev_button = tk.Button(music_p, text="Prev", command=play_prev_song, **button_style)
-prev_button.place(relx=0.35, rely=0.6, anchor="center", width=100, height=50)
+def pause():
+    pygame.mixer.music.pause()
 
-select_folder_button = tk.Button(music_p, text="Select Folder", command=select_folder, **button_style)
-select_folder_button.place(relx=0.5, rely=0.75, anchor="center", width=200, height=50)
+#Create playlist
+list_box = Listbox(music_p, bg="light blue", fg="black", width=60, selectbackground="gray", selectforeground="black")
+list_box.pack(pady=20)
 
-# Function to check for the next song when the current one ends
-def check_music_event():
-    if not pygame.mixer.music.get_busy() and music_files and is_playing:
-        play_next_song()
-    music_p.after(1000, check_music_event)
 
-# Start the music event checker
-check_music_event()
+# Function to resize the image based on the specified width and height
+def resize_image(image_path, width, height):
+    image = Image.open(image_path)  # Open the image file from the given path
+    # Resize the image to the width and height passed as arguments, and maintain the quality
+    resized_image = image.resize((width, height), Image.LANCZOS)  
+    # Convert the resized image to a format that Tkinter can use (PhotoImage)
+    return ImageTk.PhotoImage(resized_image)
+
+# Set the width and height for the button images (adjust these to control the size of buttons)
+button_width = 50  # Width of the image in pixels
+button_height = 50  # Height of the image in pixels
+
+# Resize each button image to the specified size
+back_button_img = resize_image("C:/New folder Aamir/MCA/button icons/back.png", button_width, button_height)
+next_button_img = resize_image("C:/New folder Aamir/MCA/button icons/next.png", button_width, button_height)
+pause_button_img = resize_image("C:/New folder Aamir/MCA/button icons/pause.png", button_width, button_height)
+play_button_img = resize_image("C:/New folder Aamir/MCA/button icons/play.png", button_width, button_height)
+stop_button_img = resize_image("C:/New folder Aamir/MCA/button icons/stop.png", button_width, button_height)
+
+# Create a frame (container) to hold the control buttons
+controls_frame = Frame(music_p, bg="#333333")  # 'music_p' is the main window or parent frame
+controls_frame.pack()  # Pack the frame so it's visible on the window
+
+# Create buttons for each control and assign the corresponding resized images
+back_button = Button(controls_frame, image=back_button_img, borderwidth=0, bg="#333333")  # 'borderwidth=0' removes button borders
+next_button = Button(controls_frame, image=next_button_img, borderwidth=0, bg="#333333")
+pause_button = Button(controls_frame, image=pause_button_img, borderwidth=0,bg="#333333", command=pause)
+play_button = Button(controls_frame, image=play_button_img, borderwidth=0, bg="#333333", command=play)
+stop_button = Button(controls_frame, image=stop_button_img, borderwidth=0, bg="#333333", command=stop)
+
+# Use grid layout to place the buttons in a row (one row, multiple columns)
+back_button.grid(row=0, column=0, padx=10)
+pause_button.grid(row=0,column=1, padx=10)
+play_button.grid(row=0, column=2, padx=10)  
+stop_button.grid(row=0, column=3, padx=10)  
+next_button.grid(row=0, column=4, padx=10)  
+
+#Create Menu
+my_menu = Menu(music_p)
+music_p.config(menu=my_menu)
+
+#Add song menu
+add_song_menu = Menu(my_menu)
+my_menu.add_cascade(label="Add Songs", menu=add_song_menu)
+add_song_menu.add_command(label="Add One song to playlist", command=add_song)
+
 
 music_p.mainloop()
