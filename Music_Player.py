@@ -8,7 +8,7 @@ import tkinter.ttk as ttk
 
 
 music_p = Tk()
-music_p.geometry("550x450")
+music_p.geometry("450x550")
 music_p.config(bg="#ffffff")
 music_p.title("A-Z Music Player")
 music_p.resizable(False, False)
@@ -35,12 +35,16 @@ def play_time():
     # load song with Mutagen
     song_mut = MP3(song)
     # Get song Length
-     
+    global song_length 
     song_length = song_mut.info.length
     convert_time_length = time.strftime('%M:%S', time.gmtime(song_length))
 
     # Output time to status bar
     status_bar.config(text=f'Time Elapsed: {convert_time} of {convert_time_length}  ')
+    # Update slider position value to current song position
+    my_slider.config(value=int(current_time))
+   
+
     # Update time each second i.e 1000 mili second
     status_bar.after(1000, play_time)
 
@@ -87,6 +91,11 @@ def play():
 
     # Call the play_time function to get song length
     play_time()
+
+    # Update Slider to position
+    slider_position = int (song_length)
+    my_slider.config(to=slider_position, value = 0)
+
 
 # Stop playing current song and clear selection   
 def stop():
@@ -157,8 +166,9 @@ def pause(is_paused):
         paused = True
 
 # Create slider function
-def slider(x):
-    slider_label.config(text= f'{int(my_slider.get())} of {song_length}')
+def slide(x):
+    # slider_label.config(text=my_slider.get())
+    slider_label.config(text= f'{int(my_slider.get())} of {int(song_length)}')
     
 
 #Create playlist
@@ -226,11 +236,11 @@ status_bar = Label(music_p, text = '', bd=1, relief=GROOVE, anchor= E)
 status_bar.pack(fill=X, side = BOTTOM, ipady = 2)
 
 # Create Music Position slider
-my_slider = ttk.Scale(music_p, from_=0, to = 100, orient = HORIZONTAL, value=0, command= slider, length= 450)
+my_slider = ttk.Scale(music_p, from_=0, to = 100, orient = HORIZONTAL, value=0, command= slide, length= 360)
 my_slider.pack(pady=35)
 
 # Create temp slider lavel
-slider_label = Label(music_p, text="0")
+slider_label = Label(music_p, text="0", bg="#ffffff")
 slider_label.pack(pady=10)
 
 music_p.mainloop()
