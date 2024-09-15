@@ -8,7 +8,7 @@ import tkinter.ttk as ttk
 
 
 music_p = Tk()
-music_p.geometry("550x500")
+music_p.geometry("550x450")
 music_p.config(bg="#ffffff")
 music_p.title("A-Z Music Player")
 music_p.resizable(False, False)
