@@ -8,7 +8,7 @@ import tkinter.ttk as ttk
 
 
 music_p = Tk()
-music_p.geometry("450x550")
+music_p.geometry("550x450")
 music_p.config(bg="#ffffff")
 music_p.title("A-Z Music Player")
 music_p.resizable(False, False)
@@ -18,15 +18,15 @@ pygame.mixer.init()
 
 # get song length time info
 def play_time():
-    # ge current song elapse time
+    # Check for unwanted looping
+    if stopped:
+        return 
+     # ge current song elapse time
     current_time = pygame.mixer.music.get_pos()/1000 #convert mili seconds to seconds
-
-
-    # Convert to time format
+    # Throw up temp label to get data
+    # slider_label.config(text=f'Slider:  {int(my_slider.get())} and Song Pos: {int(current_time)}')
+    # # Convert to time format
     convert_time = time.strftime('%M:%S', time.gmtime(current_time))
-
-    # Get currently playing song
-    
     # get song title from playlist
     song = list_box.get(ACTIVE)
     # Add directory file path and mp3 to the title
@@ -39,16 +39,41 @@ def play_time():
     song_length = song_mut.info.length
     convert_time_length = time.strftime('%M:%S', time.gmtime(song_length))
 
-    # Output time to status bar
-    status_bar.config(text=f'Time Elapsed: {convert_time} of {convert_time_length}  ')
-    # Update slider position value to current song position
-    my_slider.config(value=int(current_time))
-   
 
+    # Increase current_time by 1 sec
+    current_time += 1
+    if int(my_slider.get()) == int(song_length):
+        status_bar.config(text=f'Time Elapsed: {convert_time_length}')
+    elif paused:
+        pass
+    elif int(my_slider.get()) == int(current_time):
+        # Slider hasn't been moved
+         # Update Slider to position
+        slider_position = int(song_length)
+        my_slider.config(to=slider_position, value = int(current_time))
+    else :
+        # Slider has been moved
+        # Update Slider to position
+        slider_position = int(song_length)
+        my_slider.config(to=slider_position, value = int(my_slider.get()))
+        # Convert to time format
+        convert_time = time.strftime('%M:%S', time.gmtime(int(my_slider.get())))
+        
+        # Output time to status bar
+        status_bar.config(text=f'Time Elapsed: {convert_time} of {convert_time_length}')
+        # move this by one second
+        next_time = int(my_slider.get()) + 1
+        my_slider.config(value=next_time)
+    
+
+
+    # Update slider position value to current song position
+    # my_slider.config(value=int(current_time))
+    
+   
     # Update time each second i.e 1000 mili second
     status_bar.after(1000, play_time)
 
-# Add song function
 def add_song():
     song = filedialog.askopenfilename(initialdir="C:/New folder Aamir/MCA", title="Choose A Song", filetypes=(("Mp3 Files", "*.mp3"), ))
     
@@ -72,11 +97,13 @@ def add_multiple_songs():
 
 # Delete selected song from playlist
 def delete_song():
+    stop()
     list_box.delete(ANCHOR)
     # Stop music if its playing
     pygame.mixer.music.stop()
 # Delete all songs from playlist
 def delete_all_songs():
+    stop()
     list_box.delete(0, END)
     # Stop music if its playing
     pygame.mixer.music.stop()          
@@ -84,6 +111,16 @@ def delete_all_songs():
 
 # Play song
 def play():
+    global paused
+    paused = False
+    # Reset slider and status bar
+    status_bar.config(text="")
+    my_slider.config(value=0)
+    # If no song is currently selected, select the first one
+    if not list_box.curselection():
+        list_box.selection_set(0)  # Select the first song
+        list_box.activate(0)  # Activate the first song
+        
     song = list_box.get(ACTIVE)
     song = f'C:/New folder Aamir/MCA/Music/{song}.mp3'
     pygame.mixer.music.load(song)
@@ -93,59 +130,70 @@ def play():
     play_time()
 
     # Update Slider to position
-    slider_position = int (song_length)
-    my_slider.config(to=slider_position, value = 0)
-
-
-# Stop playing current song and clear selection   
-def stop():
-    pygame.mixer.music.stop()
-    list_box.select_clear(ACTIVE)
-
-    # Clear status bar
-    status_bar.config(text='')
+    # slider_position = int (song_length)
+    # my_slider.config(to=slider_position, value = 0)
 
 # Play next song 
 def next_song():
+    
+    # Reset slider and status bar
+    status_bar.config(text="")
+    my_slider.config(value=0)
+    
     # get the current song tuple number
     play_next = list_box.curselection()
     # Add one to the current song number
-    play_next = play_next[0] + 1
-    # get song title from playlist
-    song = list_box.get(play_next)
-    # Add directory file path and mp3 to the title
-    song = f'C:/New folder Aamir/MCA/Music/{song}.mp3'
-    # Load and play song
-    pygame.mixer.music.load(song)
-    pygame.mixer.music.play(loops=0)
+    if play_next:
+        play_next = play_next[0] + 1
 
-    # clear active bar in playlist
-    list_box.selection_clear(0, END)
-    # move active bar to next song which is playing now
-    list_box.activate(play_next)
-    #Set active bar to next song
-    list_box.selection_set(play_next, last= None)    
+        # Check if the current song is the last one in the playlist
+        if play_next >= list_box.size():
+            # If it's the last song, either stop or loop back to the first song
+            play_next = 0  # Wrap back to the first song
+        # get song title from playlist
+        song = list_box.get(play_next)
+        # Add directory file path and mp3 to the title
+        song = f'C:/New folder Aamir/MCA/Music/{song}.mp3'
+        # Load and play song
+        pygame.mixer.music.load(song)
+        pygame.mixer.music.play(loops=0)
+
+        # clear active bar in playlist
+        list_box.selection_clear(0, END)
+        # move active bar to next song which is playing now
+        list_box.activate(play_next)
+        #Set active bar to next song
+        list_box.selection_set(play_next, last=None)    
 
 # Play previous song in playlist
 def prev_song():
+
+    # Reset slider and status bar
+    status_bar.config(text="")
+    my_slider.config(value=0)
+    
     # get the current song tuple number
     play_next = list_box.curselection()
     # Add one to the current song number
-    play_next = play_next[0] - 1
-    # get song title from playlist
-    song = list_box.get(play_next)
-    # Add directory file path and mp3 to the title
-    song = f'C:/New folder Aamir/MCA/Music/{song}.mp3'
-    # Load and play song
-    pygame.mixer.music.load(song)
-    pygame.mixer.music.play(loops=0)
+    if play_next:
+        play_next = play_next[0] - 1
 
-    # clear active bar in playlist
-    list_box.selection_clear(0, END)
-    # move active bar to next song which is playing now
-    list_box.activate(play_next)
-    #Set active bar to next song
-    list_box.selection_set(play_next, last= None)   
+        if play_next < 0:
+            play_next = list_box.size() - 1 # Wrap to the last song
+        # get song title from playlist
+        song = list_box.get(play_next)
+        # Add directory file path and mp3 to the title
+        song = f'C:/New folder Aamir/MCA/Music/{song}.mp3'
+        # Load and play song
+        pygame.mixer.music.load(song)
+        pygame.mixer.music.play(loops=0)
+
+        # clear active bar in playlist
+        list_box.selection_clear(0, END)
+        # move active bar to next song which is playing now
+        list_box.activate(play_next)
+        #Set active bar to next song
+        list_box.selection_set(play_next, last= None)   
 
 
 # Create pause variable
@@ -165,11 +213,33 @@ def pause(is_paused):
         pygame.mixer.music.pause()
         paused = True
 
+global stopped
+stopped = False
+# Stop playing current song and clear selection   
+def stop():
+    # Reset slider and status bar
+    status_bar.config(text="")
+    my_slider.config(value=0)
+    # Stop song from playing
+    pygame.mixer.music.stop()
+
+    # Clear active selection in the listbox
+    list_box.select_clear(0, END)
+
+    # Clear status bar
+    status_bar.config(text='')
+    # set Stopped variable to true
+    global stopped
+    stopped = True
+
 # Create slider function
 def slide(x):
     # slider_label.config(text=my_slider.get())
-    slider_label.config(text= f'{int(my_slider.get())} of {int(song_length)}')
-    
+    # slider_label.config(text= f'{int(my_slider.get())} of {int(song_length)}')
+    song = list_box.get(ACTIVE)
+    song = f'C:/New folder Aamir/MCA/Music/{song}.mp3'
+    pygame.mixer.music.load(song)
+    pygame.mixer.music.play(loops=0, start= int(my_slider.get()))
 
 #Create playlist
 list_box = Listbox(music_p, bg="light blue", fg="black", width=60, selectbackground="gray", selectforeground="black")
@@ -240,7 +310,7 @@ my_slider = ttk.Scale(music_p, from_=0, to = 100, orient = HORIZONTAL, value=0, 
 my_slider.pack(pady=35)
 
 # Create temp slider lavel
-slider_label = Label(music_p, text="0", bg="#ffffff")
-slider_label.pack(pady=10)
+# slider_label = Label(music_p, text="0", bg="#ffffff")
+# slider_label.pack(pady=10)
 
 music_p.mainloop()
