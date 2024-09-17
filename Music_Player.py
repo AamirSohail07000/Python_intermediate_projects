@@ -5,6 +5,7 @@ from tkinter import filedialog
 import time
 from mutagen.mp3 import MP3 # pip install mutagen and import MP3 to show length of song
 import tkinter.ttk as ttk
+from tkinter import messagebox
 
 
 music_p = Tk()
@@ -115,6 +116,12 @@ def delete_all_songs():
 def play():
     global paused
     paused = False
+
+    # Check if there are any songs in the playlist
+    if list_box.size() == 0:
+        # Display a message if the playlist is empty
+        messagebox.showwarning("Playlist Empty", "Add songs to your playlist.")
+        return  # Exit the function
     # Reset slider and status bar
     status_bar.config(text="")
     my_slider.config(value=0)
