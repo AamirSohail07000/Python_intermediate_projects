@@ -241,9 +241,12 @@ def slide(x):
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops=0, start= int(my_slider.get()))
 
+# Create master frame
+master_frame = Frame(music_p)
+master_frame.pack(pady=20)
 #Create playlist
-list_box = Listbox(music_p, bg="light blue", fg="black", width=60, selectbackground="gray", selectforeground="black")
-list_box.pack(pady=20)
+list_box = Listbox(master_frame, bg="light blue", fg="black", width=60, selectbackground="gray", selectforeground="black")
+list_box.grid(row=0, column=0)
 
 
 # Function to resize the image based on the specified width and height
@@ -266,8 +269,8 @@ play_button_img = resize_image("C:/New folder Aamir/MCA/button icons/play.png", 
 stop_button_img = resize_image("C:/New folder Aamir/MCA/button icons/stop.png", button_width, button_height)
 
 # Create a frame (container) to hold the control buttons
-controls_frame = Frame(music_p, bg="#ffffff")  # 'music_p' is the main window or parent frame
-controls_frame.pack()  # Pack the frame so it's visible on the window
+controls_frame = Frame(master_frame, bg="#ffffff")  # 'music_p' is the main window or parent frame
+controls_frame.grid(row=1, column=0)  # Pack the frame so it's visible on the window
 
 # Create buttons for each control and assign the corresponding resized images
 back_button = Button(controls_frame, image=back_button_img, borderwidth=0, bg="#ffffff", command= prev_song)  # 'borderwidth=0' removes button borders
@@ -306,8 +309,8 @@ status_bar = Label(music_p, text = '', bd=1, relief=GROOVE, anchor= E)
 status_bar.pack(fill=X, side = BOTTOM, ipady = 2)
 
 # Create Music Position slider
-my_slider = ttk.Scale(music_p, from_=0, to = 100, orient = HORIZONTAL, value=0, command= slide, length= 360)
-my_slider.pack(pady=35)
+my_slider = ttk.Scale(master_frame, from_=0, to = 100, orient = HORIZONTAL, value=0, command= slide, length= 360)
+my_slider.grid(row=2, column=0,pady=30)
 
 # Create temp slider lavel
 # slider_label = Label(music_p, text="0", bg="#ffffff")
