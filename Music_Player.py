@@ -9,9 +9,11 @@ import tkinter.ttk as ttk
 
 music_p = Tk()
 music_p.geometry("550x450")
-music_p.config(bg="#ffffff")
+music_p.config(bg="#fffcfc")
 music_p.title("A-Z Music Player")
 music_p.resizable(False, False)
+
+
 
 #Initialize pygame mixter
 pygame.mixer.init()
@@ -241,9 +243,18 @@ def slide(x):
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops=0, start= int(my_slider.get()))
 
+# Create Volume Function
+def volume(X):
+    pass
+
+
+
+
 # Create master frame
 master_frame = Frame(music_p)
 master_frame.pack(pady=20)
+master_frame.config(bg="#fffcfc")
+
 #Create playlist
 list_box = Listbox(master_frame, bg="light blue", fg="black", width=60, selectbackground="gray", selectforeground="black")
 list_box.grid(row=0, column=0)
@@ -269,15 +280,19 @@ play_button_img = resize_image("C:/New folder Aamir/MCA/button icons/play.png", 
 stop_button_img = resize_image("C:/New folder Aamir/MCA/button icons/stop.png", button_width, button_height)
 
 # Create a frame (container) to hold the control buttons
-controls_frame = Frame(master_frame, bg="#ffffff")  # 'music_p' is the main window or parent frame
-controls_frame.grid(row=1, column=0)  # Pack the frame so it's visible on the window
+controls_frame = Frame(master_frame, bg="#fffcfc")  # 'music_p' is the main window or parent frame
+controls_frame.grid(row=1, column=0, pady=25)  # Pack the frame so it's visible on the window
+
+# Create volume Label frame 
+volume_frame = LabelFrame(master_frame, text="Volume")
+volume_frame.grid(row=0, column=1, padx= 20)
 
 # Create buttons for each control and assign the corresponding resized images
-back_button = Button(controls_frame, image=back_button_img, borderwidth=0, bg="#ffffff", command= prev_song)  # 'borderwidth=0' removes button borders
-next_button = Button(controls_frame, image=next_button_img, borderwidth=0, bg="#ffffff", command= next_song)
-pause_button = Button(controls_frame, image=pause_button_img, borderwidth=0,bg="#ffffff", command= lambda: pause(paused))
-play_button = Button(controls_frame, image=play_button_img, borderwidth=0, bg="#ffffff", command=play)
-stop_button = Button(controls_frame, image=stop_button_img, borderwidth=0, bg="#ffffff", command=stop)
+back_button = Button(controls_frame, image=back_button_img, borderwidth=0, bg="#fffcfc", command= prev_song)  # 'borderwidth=0' removes button borders
+next_button = Button(controls_frame, image=next_button_img, borderwidth=0, bg="#fffcfc", command= next_song)
+pause_button = Button(controls_frame, image=pause_button_img, borderwidth=0,bg="#fffcfc", command= lambda: pause(paused))
+play_button = Button(controls_frame, image=play_button_img, borderwidth=0, bg="#fffcfc", command=play)
+stop_button = Button(controls_frame, image=stop_button_img, borderwidth=0, bg="#fffcfc", command=stop)
 
 # Use grid layout to place the buttons in a row (one row, multiple columns)
 back_button.grid(row=0, column=0, padx=10)
@@ -307,13 +322,21 @@ remove_song_menu.add_command(label="Delete All Song from Playlist", command= del
 # Create status bar
 status_bar = Label(music_p, text = '', bd=1, relief=GROOVE, anchor= E)
 status_bar.pack(fill=X, side = BOTTOM, ipady = 2)
+# create a new style to fix background color issue of slider
+style = ttk.Style()
+# Configure the background of the 'TScale' (for ttk.Scale)
+style.configure("TScale", bg="#fffcfc")  # Replace "lightblue" with your desired color
 
 # Create Music Position slider
 my_slider = ttk.Scale(master_frame, from_=0, to = 100, orient = HORIZONTAL, value=0, command= slide, length= 360)
-my_slider.grid(row=2, column=0,pady=30)
+my_slider.grid(row=2, column=0,pady=15)
+
+# Create Volume slider
+volume_slider = ttk.Scale(volume_frame, from_=0, to = 1, orient = VERTICAL, value=1, command= volume, length= 125)
+volume_slider.pack(pady=10)
 
 # Create temp slider lavel
-# slider_label = Label(music_p, text="0", bg="#ffffff")
+# slider_label = Label(music_p, text="0", bg="#fffcfc")
 # slider_label.pack(pady=10)
 
 music_p.mainloop()
