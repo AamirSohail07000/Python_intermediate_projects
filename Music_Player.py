@@ -135,6 +135,10 @@ def play():
     # slider_position = int (song_length)
     # my_slider.config(to=slider_position, value = 0)
 
+    # # get current volume 
+    # current_volume = pygame.mixer.music.get_volume()
+    # slider_label.config(text=current_volume*100)
+
 # Play next song 
 def next_song():
     
@@ -245,8 +249,11 @@ def slide(x):
 
 # Create Volume Function
 def volume(X):
-    pass
+    pygame.mixer.music.set_volume(volume_slider.get())
 
+    # get current volume 
+    # current_volume = pygame.mixer.music.get_volume()
+    # slider_label.config(text=current_volume*100)
 
 
 
@@ -332,7 +339,7 @@ my_slider = ttk.Scale(master_frame, from_=0, to = 100, orient = HORIZONTAL, valu
 my_slider.grid(row=2, column=0,pady=15)
 
 # Create Volume slider
-volume_slider = ttk.Scale(volume_frame, from_=0, to = 1, orient = VERTICAL, value=1, command= volume, length= 125)
+volume_slider = ttk.Scale(volume_frame, from_=1, to = 0, orient = VERTICAL, value=1, command= volume, length= 130)
 volume_slider.pack(pady=10)
 
 # Create temp slider lavel
